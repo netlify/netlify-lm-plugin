@@ -7,6 +7,8 @@
   "dependencies": {
     "@oclif/command": "^1",
     "@oclif/config": "^1",
+    "listr": "^0.14.3",
+    "node-fetch": "^2.3.0",
     "tslib": "^1"
   },
   "devDependencies": {
@@ -36,12 +38,14 @@
   ],
   "homepage": "https://github.com/netlify/netlify-lm-plugin",
   "keywords": [
-    "oclif-plugin"
+    "netlify",
+    "netlify-cli",
+    "netlify-cli-plugin"
   ],
   "license": "MIT",
   "oclif": {
     "commands": "./lib/commands",
-    "bin": "oclif-example",
+    "bin": "netlify",
     "devPlugins": [
       "@oclif/plugin-help"
     ]
