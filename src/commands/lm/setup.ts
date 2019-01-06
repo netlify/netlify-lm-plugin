@@ -51,7 +51,9 @@ and configures your Git environment with the right credentials.
     const tasks = new Listr([
       {
         title: `Installing Netlify's Git Credential Helper for Windows`,
-        task: this.installWithPowershell(helperPath)
+        task: async function() {
+          return installWithPowershell(helperPath)
+        } 
       },
       {
         title: `Configuring Git to use Netlify's Git Credential Helper`,
@@ -59,19 +61,7 @@ and configures your Git environment with the right credentials.
       },
     ])
 
-    tasks.run().catch(err => this.log(err));
-  }
-
-  async installWithPowershell(helperPath: string) {
-    const script = `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-iex (iwr https://github.com/netlify/netlify-credential-helper/raw/master/resources/install.ps1)`
-
-    const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'netlify-'))
-    const scriptPath = path.join(temp, 'install.ps1')
-
-    fs.writeFileSync(scriptPath, script)
-
-    return execa('powershell', ['-File', scriptPath, '-windowstyle', 'hidden'])
+    tasks.run().catch(err => this.log(err))
   }
 
   async setupUnix(platformKey: string, platformName: string) {
@@ -93,8 +83,20 @@ iex (iwr https://github.com/netlify/netlify-credential-helper/raw/master/resourc
       },
     ])
 
-    tasks.run().catch(err => this.log(err));
+    tasks.run().catch(err => this.log(err))
   }
+}
+
+async function installWithPowershell(helperPath: string) {
+  const script = `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+iex (iwr https://github.com/netlify/netlify-credential-helper/raw/master/resources/install.ps1)`
+
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'netlify-'))
+  const scriptPath = path.join(temp, 'install.ps1')
+
+  fs.writeFileSync(scriptPath, script)
+
+  return execa('powershell', ['-ExecutionPolicy', 'unrestricted', '-File', scriptPath, '-windowstyle', 'hidden'])
 }
 
 async function resolveRelease() : Promise<string> {
@@ -169,10 +171,12 @@ Set the helper path in your environment PATH: ${helperPath}/bin`
 }
 
 function setupGitConfig(helperPath: string) {
+  // Git expects the config path to always use / even on Windows
+  const gitConfigPath = path.join(helperPath, 'git-config').replace(/\\/g, '/')
   const gitConfigContent = `
 # This next lines include Netlify's Git Credential Helper configuration in your Git configuration.
 [include]
-  path = ${helperPath}/git-config
+  path = ${gitConfigPath}
 `
   const helperConfig = `[credential]
   helper = netlify
