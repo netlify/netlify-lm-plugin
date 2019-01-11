@@ -3,6 +3,8 @@ import fs = require('fs')
 import os = require('os')
 import path = require('path')
 
+import Requirements from '../../requirements'
+
 const execa = require('execa')
 const fetch = require('node-fetch')
 const Listr = require('listr')
@@ -48,24 +50,31 @@ and configures your Git environment with the right credentials.
 
   async setupWindows() {
     const helperPath = path.join(os.homedir(), ".netlify", "helper")
-    const tasks = new Listr([
+    const req = new Requirements()
+    const steps = req.gitValidators()
+
+    steps.push(
       {
         title: `Installing Netlify's Git Credential Helper for Windows`,
         task: async function() {
           return installWithPowershell(helperPath)
-        } 
+        }
       },
       {
         title: `Configuring Git to use Netlify's Git Credential Helper`,
         task: () => setupGitConfig(helperPath)
-      },
-    ])
+      }
+    )
 
+    const tasks = new Listr(steps)
     tasks.run().catch(err => this.log(err))
   }
 
   async setupUnix(platformKey: string, platformName: string) {
-    const tasks = new Listr([
+    const req = new Requirements()
+    const steps = req.gitValidators()
+
+    steps.push(
       {
         title: `Installing Netlify's Git Credential Helper for ${platformName}`,
         task: async function(ctx, task) {
@@ -80,9 +89,10 @@ and configures your Git environment with the right credentials.
           setupUnixPath(ctx.helperPath)
           setupGitConfig(ctx.helperPath)
         }
-      },
-    ])
+      }
+    )
 
+    const tasks = new Listr(steps)
     tasks.run().catch(err => this.log(err))
   }
 }
