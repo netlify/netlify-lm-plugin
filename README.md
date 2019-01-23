@@ -28,6 +28,11 @@ your environment to use it when you push media files to Netlify's Large Media.
 
 If you run this commands multiple times, it will update the binary files and the configuration.
 
+### lm:setup
+
+This command configures your Netlify site to use Large Media.
+It checks if you already have the Netlify's Git Credential Helper and it installs it if you don't.
+
 # License
 
 [License](LICENSE)
