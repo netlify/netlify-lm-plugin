@@ -15,7 +15,7 @@ export const GitValidators = [
 export async function checkGitVersion() : Promise<string|Error> {
   try {
     const result = await execa('git', ['--version'])
-    return Promise.resolve(result.split(' ').pop())
+    return Promise.resolve(result.stdout.split(' ').pop())
   } catch (error) {
     return Promise.reject(new Error('Check that Git is installed in your system'))
   }
