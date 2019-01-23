@@ -12,7 +12,7 @@ Netlify CLI plugin to work with Netlify Large Media.
 
 ```sh-session
 $ netlify plugins:install netlify-lm
-$ netlify lm:install
+$ netlify lm:setup
 ```
 
 ## Commands

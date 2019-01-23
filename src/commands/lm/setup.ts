@@ -21,7 +21,10 @@ It runs the install command if you have not installed the dependencies yet.
   ]
 
   static flags = {
-    'skip-install': flags.boolean({char: 's'})
+    'skip-install': flags.boolean({
+      char: 's',
+      description: 'Skip the credentials helper installation check'
+    })
   }
 
   async run() {
