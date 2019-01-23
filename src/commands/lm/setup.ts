@@ -53,7 +53,10 @@ It runs the install command if you have not installed the dependencies yet.
 async function installHelperIfMissing() {
   let installHelper = false
   try {
-    await checkHelperVersion()
+    const version = await checkHelperVersion()
+    if (!version) {
+      installHelper = true
+    }
   } catch (error) {
     installHelper = true
   }

@@ -43,4 +43,5 @@ function matchVersion(out: string, regex: RegExp, version: string, message: stri
   if (!match || match.length != 2 || semver.lt(match[1], version)) {
     return Promise.reject(new Error(message))
   }
+  return Promise.resolve(match[1])
 }
