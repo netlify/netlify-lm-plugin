@@ -1,5 +1,5 @@
 import {Command, flags} from '@oclif/command'
-import Requirements from '../../requirements'
+import {GitValidators, checkHelperVersion} from '../../requirements'
 
 const execa = require('execa')
 const Listr = require('listr')
@@ -12,11 +12,10 @@ export default class LmInfo extends Command {
   static usage = 'lm:info'
 
   async run() {
-    const req = new Requirements()
-    const steps = req.gitValidators()
+    const steps = GitValidators
     steps.push({
       title: `Checking Netlify's Git Credentials version`,
-      task: req.checkHelperVersion
+      task: checkHelperVersion
     })
 
     const tasks = new Listr(steps, {concurrent: true, exitOnError: false})
