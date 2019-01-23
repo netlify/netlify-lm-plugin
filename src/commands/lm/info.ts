@@ -5,9 +5,15 @@ const execa = require('execa')
 const Listr = require('listr')
 const semver = require('semver')
 
-export default class LmIndex extends Command {
+export default class LmInfo extends Command {
   static description = 'Print Netlify Large Media information'
   static examples = ['$ <%- config.bin %> lm']
+
+  static usage = 'lm:info'
+
+  static examples = [
+    '$ <%= config.bin %> lm:info'
+  ]
 
   async run() {
     const req = new Requirements()

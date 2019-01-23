@@ -17,6 +17,10 @@ $ netlify lm:setup
 
 ## Commands
 
+### lm:info
+
+Prints system information about Git, Git LFS and Netlify's Git Credential Helper.
+
 ### lm:setup
 
 This commands downloads Netlify's Git Credential Helper and configures
