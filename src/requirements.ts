@@ -15,7 +15,7 @@ export default class Requirements {
     ]
   }
 
-  async checkGitVersion() {
+  async checkGitVersion() : Promise<void> {
     try {
       await execa('git', ['--version'])
     } catch (error) {
@@ -23,7 +23,7 @@ export default class Requirements {
     }
   }
 
-  async checkLFSVersion() {
+  async checkLFSVersion() : Promise<void> {
     try {
       const result = await execa('git-lfs', ['--version'])
       return matchVersion(result.stdout, /git-lfs\/([\.\d]+).*/, '2.5.1', 'Invalid Git LFS version. Please update to version 2.5.1 or above')
@@ -42,7 +42,7 @@ export default class Requirements {
   }
 }
 
-function matchVersion(out, regex, version, message) {
+function matchVersion(out: string, regex: RegExp, version: string, message: string) {
   const match = out.match(regex)
   if (!match || match.length != 2 || semver.lt(match[1], version)) {
     return Promise.reject(new Error(message))
