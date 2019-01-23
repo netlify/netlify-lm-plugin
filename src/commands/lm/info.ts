@@ -6,14 +6,10 @@ const Listr = require('listr')
 const semver = require('semver')
 
 export default class LmInfo extends Command {
-  static description = 'Print Netlify Large Media information'
-  static examples = ['$ <%- config.bin %> lm']
+  static description = 'Netlify Large Media'
+  static examples = ['$ <%- config.bin %> lm:info']
 
   static usage = 'lm:info'
-
-  static examples = [
-    '$ <%= config.bin %> lm:info'
-  ]
 
   async run() {
     const req = new Requirements()
