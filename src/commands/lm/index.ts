@@ -18,6 +18,6 @@ export default class LmIndex extends Command {
     })
 
     const tasks = new Listr(steps, {concurrent: true, exitOnError: false})
-    tasks.run().catch(err => {})
+    tasks.run().catch((err: any) => {})
   } 
 }
