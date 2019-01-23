@@ -12,7 +12,7 @@ Netlify CLI plugin to work with Netlify Large Media.
 
 ```sh-session
 $ netlify plugins:install netlify-lm
-$ netlify lm:setup
+$ netlify lm:install
 ```
 
 ## Commands
@@ -21,7 +21,7 @@ $ netlify lm:setup
 
 Prints system information about Git, Git LFS and Netlify's Git Credential Helper.
 
-### lm:setup
+### lm:install
 
 This commands downloads Netlify's Git Credential Helper and configures
 your environment to use it when you push media files to Netlify's Large Media.

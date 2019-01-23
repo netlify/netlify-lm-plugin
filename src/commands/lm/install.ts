@@ -9,17 +9,17 @@ const execa = require('execa')
 const fetch = require('node-fetch')
 const Listr = require('listr')
 
-export default class LmSetup extends Command {
+export default class LmInstall extends Command {
   static description = `Configures your computer to use Netlify Large Media (LM).
 It installs the required credentials helper for Git,
 and configures your Git environment with the right credentials.
 `
-  static usage = 'lm:setup'
+  static usage = 'lm:install'
 
   static examples = [
-    '$ <%= config.bin %> lm:setup'
+    '$ <%= config.bin %> lm:install'
   ]
-  static aliases = ['lm:init', 'lm:install']
+  static aliases = ['lm:init']
 
   async run() {
     const platform = os.platform()
