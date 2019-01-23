@@ -12,15 +12,16 @@ export const GitValidators = [
   }
 ]
 
-export async function checkGitVersion() : Promise<void> {
+export async function checkGitVersion() : Promise<string|Error> {
   try {
-    await execa('git', ['--version'])
+    const result = await execa('git', ['--version'])
+    return Promise.resolve(result.split(' ').pop())
   } catch (error) {
     return Promise.reject(new Error('Check that Git is installed in your system'))
   }
 }
 
-export async function checkLFSVersion() : Promise<void> {
+export async function checkLFSVersion() : Promise<string|Error> {
   try {
     const result = await execa('git-lfs', ['--version'])
     return matchVersion(result.stdout, /git-lfs\/([\.\d]+).*/, '2.5.1', 'Invalid Git LFS version. Please update to version 2.5.1 or above')
@@ -38,7 +39,7 @@ export async function checkHelperVersion() {
   }
 }
 
-function matchVersion(out: string, regex: RegExp, version: string, message: string) {
+function matchVersion(out: string, regex: RegExp, version: string, message: string) : Promise<string|Error> {
   const match = out.match(regex)
   if (!match || match.length != 2 || semver.lt(match[1], version)) {
     return Promise.reject(new Error(message))

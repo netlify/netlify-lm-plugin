@@ -15,7 +15,9 @@ export default class LmInfo extends Command {
     const steps = GitValidators
     steps.push({
       title: `Checking Netlify's Git Credentials version`,
-      task: checkHelperVersion
+      task: async function() : Promise<any> {
+        checkHelperVersion();
+      }
     })
 
     const tasks = new Listr(steps, {concurrent: true, exitOnError: false})

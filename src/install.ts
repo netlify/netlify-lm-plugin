@@ -48,7 +48,7 @@ async function setupUnix(platformKey: string, platformName: string) {
   steps.push(
     {
       title: `Installing Netlify's Git Credential Helper for ${platformName}`,
-      task: async function() : Promise<void> {
+      task: async function() : Promise<any> {
         const release = await resolveRelease()
         const file = await downloadFile(platformKey, release, 'tar.gz')
         await extractFile(file)
@@ -64,7 +64,7 @@ async function setupUnix(platformKey: string, platformName: string) {
   return tasks.run()
 }
 
-async function configureUnixInstall() : Promise<void> {
+async function configureUnixInstall() : Promise<any> {
   const helperPath = joinHelperPath()
   const pathPromise = setupUnixPath(helperPath)
   const configPromise = configureGitConfig(helperPath)
@@ -86,8 +86,8 @@ iex (iwr https://github.com/netlify/netlify-credential-helper/raw/master/resourc
   return execa('powershell', ['-ExecutionPolicy', 'unrestricted', '-File', scriptPath, '-windowstyle', 'hidden'])
 }
 
-async function setupGitConfig() {
-  await configureGitConfig(joinHelperPath())
+async function setupGitConfig() : Promise<any>{
+  return configureGitConfig(joinHelperPath())
 }
 
 async function resolveRelease() : Promise<string> {
