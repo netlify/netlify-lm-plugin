@@ -33,6 +33,18 @@ If you run this commands multiple times, it will update the binary files and the
 This command configures your Netlify site to use Large Media.
 It checks if you already have the Netlify's Git Credential Helper and it installs it if you don't.
 
+## Development
+
+This project uses Yarn to manage dependencies, use `yarn install` to install its dependencies.
+If you want to test a development version with the CLI you can link your code 
+with Netlify's CLI by running this from the base of this repository:
+
+```
+netlify plugins:link .
+```
+
+After that, you can check that the plugin is installed with `netlify lm:info`.
+
 # License
 
 [License](LICENSE)

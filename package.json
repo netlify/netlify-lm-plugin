@@ -1,5 +1,5 @@
 {
-  "name": "netlify-lm",
+  "name": "netlify-lm-plugin",
   "description": "Netlify CLI plugin to work with Netlify Large Media",
   "version": "0.1.0",
   "author": "David Calavera @calavera",
