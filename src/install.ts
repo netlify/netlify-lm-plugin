@@ -76,7 +76,7 @@ async function configureUnixInstall() : Promise<any> {
 async function installWithPowershell() {
   const helperPath = joinHelperPath()
   const script = `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-iex (iwr https://github.com/netlify/netlify-credential-helper/raw/master/resources/install.ps1)`
+iex (iwr -UseBasicParsing -Uri https://github.com/netlify/netlify-credential-helper/raw/master/resources/install.ps1)`
 
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'netlify-'))
   const scriptPath = path.join(temp, 'install.ps1')
