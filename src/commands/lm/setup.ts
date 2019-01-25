@@ -81,7 +81,7 @@ async function provisionService(accessToken: string, siteId: string) {
 
   const currentAddon = addons.find((addon: netlifyAddon) => addon.service_path === '/.netlify/large-media')
 
-  if (currentAddon.id) {
+  if (currentAddon) {
     return Promise.resolve('Service already provisioned for this site')
   }
 
