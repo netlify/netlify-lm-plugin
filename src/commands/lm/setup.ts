@@ -4,10 +4,23 @@ import {checkHelperVersion} from '../../requirements'
 
 const Command = require('@netlify/cli-utils')
 const { getAddons, createAddon } = require('netlify/src/addons')
+const execa = require('execa')
 const Listr = require('listr')
+
+interface siteInfo {
+  ssl_url: string;
+}
+
+interface siteQuery {
+  siteId: string;
+}
 
 interface netlifyAddon {
   service_path: string;
+}
+
+interface netlifyClient {
+  getSite(req: siteQuery): siteInfo;
 }
 
 export default class LmSetup extends Command {
@@ -46,6 +59,12 @@ It runs the install command if you have not installed the dependencies yet.
         title: 'Provisioning Netlify Large Media',
         task: async function() {
           await provisionService(accessToken, site.id)
+        }
+      },
+      {
+        title: 'Configuring Git LFS for this site',
+        task: async function() {
+          await configureLFSURL(site.id, api)
         }
       }
     ])
@@ -90,4 +109,11 @@ async function provisionService(accessToken: string, siteId: string) {
     addon: 'large-media'
   }
   return createAddon(settings, accessToken)
+}
+
+async function configureLFSURL(siteId: string, api: netlifyClient) {
+  const siteInfo = await api.getSite({ siteId })
+  const url = `${siteInfo.ssl_url}/.netlify/large-media`
+
+  return execa('git', ['config', '-f', '.lfsconfig', 'lfs.url', url])
 }
