@@ -64,7 +64,7 @@ It runs the install command if you have not installed the dependencies yet.
       {
         title: 'Configuring Git LFS for this site',
         task: async function() {
-          await configureLFSURL(accessToken, site.id, api)
+          await configureLFSURL(site.id, api)
         }
       }
     ])
@@ -111,7 +111,7 @@ async function provisionService(accessToken: string, siteId: string) {
   return createAddon(settings, accessToken)
 }
 
-async function configureLFSURL(accessToken: string, siteId: string, api: netlifyClient) {
+async function configureLFSURL(siteId: string, api: netlifyClient) {
   const siteInfo = await api.getSite({ siteId })
   const url = `${siteInfo.ssl_url}/.netlify/large-media`
 
