@@ -213,15 +213,6 @@ async function configureGitConfig(helperPath: string) {
     }
   }
 
-  try {
-    await execa('git', ['config', '--global', '--rename-section', 'credential', 'credential-backup'])
-  } catch (error) {
-    // ignore error caused by not having any credential configured
-    if (!error.stderr || !error.stderr.includes("no such section")) {
-      throw error
-    }
-  }
-
   // Git expects the config path to always use / even on Windows
   const gitConfigPath = path.join(helperPath, 'git-config').replace(/\\/g, '/')
   const gitConfigContent = `
