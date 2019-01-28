@@ -201,6 +201,18 @@ async function writeConfig(name: string, initContent: string) {
 }
 
 async function configureGitConfig(helperPath: string) {
+  let currentCredentials = []
+
+  try {
+    const {stdout} = await execa('git', ['config', '--global', '--get-regexp', '^credential'])
+    currentCredentials = stdout.split("\\n")
+  } catch (error) {
+    // ignore error caused by not having any credential configured
+    if (error.stdout !== '') {
+      throw error
+    }
+  }
+
   // Git expects the config path to always use / even on Windows
   const gitConfigPath = path.join(helperPath, 'git-config').replace(/\\/g, '/')
   const gitConfigContent = `
@@ -208,10 +220,31 @@ async function configureGitConfig(helperPath: string) {
 [include]
   path = ${gitConfigPath}
 `
-  const helperConfig = `[credential]
+
+  let helperConfig = `
+# The first line resets the list of helpers so we can check Netlify's first.
+[credential]
+  helper = ""
+
+[credential]
   helper = netlify
   useHttpPath = true
 `
+
+  let section = 'credential'
+  currentCredentials.forEach((line: string) => {
+    const parts = line.split(' ')
+    if (parts.length === 2) {
+      const keys = parts[0].split('.')
+      const localSection = keys.slice(0, -1).join('.')
+      if (section !== localSection) {
+        helperConfig += keys.length > 2 ? `\n[credential "${keys[1]}"]\n` : '\n[credential]\n'
+        section = localSection
+      }
+
+      helperConfig += `  ${keys.pop()}=${parts[1]}\n`
+    }
+  })
 
   fs.writeFileSync(path.join(helperPath, 'git-config'), helperConfig)
   return writeConfig('.gitconfig', gitConfigContent)
