@@ -201,7 +201,18 @@ async function writeConfig(name: string, initContent: string) {
 }
 
 async function configureGitConfig(helperPath: string) {
-  const {stdout} = await execa('git', ['config', '--global', '--get-regexp', '^credential'])
+  let currentCredentials = []
+
+  try {
+    const {stdout} = await execa('git', ['config', '--global', '--get-regexp', '^credential'])
+    currentCredentials = stdout.split("\\n")
+  } catch (error) {
+    // ignore error caused by not having any credential configured
+    if (error.stdout !== '') {
+      throw error
+    }
+  }
+
   try {
     await execa('git', ['config', '--global', '--rename-section', 'credential', 'credential-backup'])
   } catch (error) {
@@ -230,7 +241,7 @@ async function configureGitConfig(helperPath: string) {
 `
 
   let section = 'credential'
-  stdout.split("\\n").forEach((line: string) => {
+  currentCredentials.forEach((line: string) => {
     const parts = line.split(' ')
     if (parts.length === 2) {
       const keys = parts[0].split('.')
@@ -243,8 +254,6 @@ async function configureGitConfig(helperPath: string) {
       helperConfig += `  ${keys.pop()}=${parts[1]}\n`
     }
   })
-
-  console.log(helperConfig)
 
   fs.writeFileSync(path.join(helperPath, 'git-config'), helperConfig)
   return writeConfig('.gitconfig', gitConfigContent)
