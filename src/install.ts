@@ -201,6 +201,16 @@ async function writeConfig(name: string, initContent: string) {
 }
 
 async function configureGitConfig(helperPath: string) {
+  const {stdout} = await execa('git', ['config', '--global', '--get-regexp', '^credential'])
+  try {
+    await execa('git', ['config', '--global', '--rename-section', 'credential', 'credential-backup'])
+  } catch (error) {
+    // ignore error caused by not having any credential configured
+    if (!error.stderr || !error.stderr.includes("no such section")) {
+      throw error
+    }
+  }
+
   // Git expects the config path to always use / even on Windows
   const gitConfigPath = path.join(helperPath, 'git-config').replace(/\\/g, '/')
   const gitConfigContent = `
@@ -208,10 +218,33 @@ async function configureGitConfig(helperPath: string) {
 [include]
   path = ${gitConfigPath}
 `
-  const helperConfig = `[credential]
+
+  let helperConfig = `
+# The first line resets the list of helpers so we can check Netlify's first.
+[credential]
+  helper = ""
+
+[credential]
   helper = netlify
   useHttpPath = true
 `
+
+  let section = 'credential'
+  stdout.split("\\n").forEach((line: string) => {
+    const parts = line.split(' ')
+    if (parts.length === 2) {
+      const keys = parts[0].split('.')
+      const localSection = keys.slice(0, -1).join('.')
+      if (section !== localSection) {
+        helperConfig += keys.length > 2 ? `\n[credential "${keys[1]}"]\n` : '\n[credential]\n'
+        section = localSection
+      }
+
+      helperConfig += `  ${keys.pop()}=${parts[1]}\n`
+    }
+  })
+
+  console.log(helperConfig)
 
   fs.writeFileSync(path.join(helperPath, 'git-config'), helperConfig)
   return writeConfig('.gitconfig', gitConfigContent)
