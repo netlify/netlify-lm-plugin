@@ -115,13 +115,37 @@ async function downloadFile(platform: string, release: string, format: string) :
 }
 
 async function extractFile(file: string) {
-  const dir = path.join(joinHelperPath(), "bin")
+  const helperPath = joinHelperPath()
+  const binPath = path.join(helperPath, "bin")
 
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
+  if (!fs.existsSync(binPath)) {
+    try {
+      fs.mkdirSync(binPath, { recursive: true })
+    } catch (error) {
+      if (!error.code || error.code !== 'ENOENT') {
+        throw error
+      }
+
+      // Try creating the directory structure without
+      // the recursive option because some versions
+      // of Node ignore this option even when set.
+      // See: https://github.com/FredLackey/node/pull/1
+      const basePath = path.dirname(helperPath)
+      if (!fs.existsSync(basePath)) {
+        fs.mkdirSync(basePath)
+      }
+
+      if (!fs.existsSync(helperPath)) {
+        fs.mkdirSync(helperPath)
+      }
+
+      if (!fs.existsSync(binPath)) {
+        fs.mkdirSync(binPath)
+      }
+    }
   }
 
-  await execa('tar', ['-C', dir, '-xzf', file])
+  await execa('tar', ['-C', binPath, '-xzf', file])
 }
 
 async function setupUnixPath(helperPath: string) {
