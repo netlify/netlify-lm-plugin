@@ -220,15 +220,10 @@ async function configureGitConfig(helperPath: string) {
 
 [credential]
   helper = netlify
-  useHttpPath = true
 `
 
   let section = 'credential'
   if (currentCredentials.length > 0) {
-    helperConfig += `
-[credential]
-  useHttpPath = false
-`
     currentCredentials.forEach((line: string) => {
       const parts = line.split(' ')
 
