@@ -240,7 +240,7 @@ async function configureGitConfig(helperPath: string) {
           section = localSection
         }
 
-        helperConfig += `  ${keys.pop()}=${parts[1]}\n`
+        helperConfig += `  ${keys.pop()} = ${parts[1]}\n`
       }
     })
   }
