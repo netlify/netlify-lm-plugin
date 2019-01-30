@@ -8,7 +8,7 @@ const execa = require('execa')
 const Listr = require('listr')
 
 interface siteInfo {
-  ssl_url: string;
+  id_domain: string;
 }
 
 interface siteQuery {
@@ -113,7 +113,7 @@ async function provisionService(accessToken: string, siteId: string) {
 
 async function configureLFSURL(siteId: string, api: netlifyClient) {
   const siteInfo = await api.getSite({ siteId })
-  const url = `${siteInfo.ssl_url}/.netlify/large-media`
+  const url = `https://${siteInfo.id_domain}/.netlify/large-media`
 
   return execa('git', ['config', '-f', '.lfsconfig', 'lfs.url', url])
 }
