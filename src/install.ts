@@ -6,32 +6,29 @@ import {GitValidators} from './requirements'
 
 const execa = require('execa')
 const fetch = require('node-fetch')
+const hasbin = require('hasbin')
 const Listr = require('listr')
 
 export async function installPlatform() {
-    const platform = os.platform()
-
-    switch (platform) {
-      case 'linux':
-        return setupUnix('linux', 'Linux')
-      case 'darwin':
-        return setupUnix('darwin', 'Mac OS X')
-      case 'win32':
-        return setupWindows()
-      default:
-        return Promise.reject(new Error(`Platform not supported: ${platform}.
-See manual setup instructions in https://github.com/netlify/netlify-credential-helper#install`))
-    }
-}
-
-async function setupWindows() {
+  const platform = os.platform()
   const steps = GitValidators
 
+  switch (platform) {
+    case 'linux':
+      steps.push(setupUnix('linux', 'Linux'))
+      break
+    case 'darwin':
+      steps.push(setupUnix('darwin', 'Mac OS X'))
+      break
+    case 'win32':
+      steps.push(setupWindows())
+      break
+    default:
+      return Promise.reject(new Error(`Platform not supported: ${platform}.
+e manual setup instructions in https://github.com/netlify/netlify-credential-helper#install`))
+  }
+
   steps.push(
-    {
-      title: `Installing Netlify's Git Credential Helper for Windows`,
-      task: installWithPowershell
-    },
     {
       title: `Configuring Git to use Netlify's Git Credential Helper`,
       task: setupGitConfig
@@ -42,35 +39,35 @@ async function setupWindows() {
   return tasks.run()
 }
 
-async function setupUnix(platformKey: string, platformName: string) {
-  const steps = GitValidators
-
-  steps.push(
-    {
-      title: `Installing Netlify's Git Credential Helper for ${platformName}`,
-      task: async function() : Promise<any> {
-        const release = await resolveRelease()
-        const file = await downloadFile(platformKey, release, 'tar.gz')
-        await extractFile(file)
-      }
-    },
-    {
-      title: `Configuring Git to use Netlify's Git Credential Helper`,
-      task: configureUnixInstall
-    }
-  )
-
-  const tasks = new Listr(steps)
-  return tasks.run()
+function installedWithPackageManager() {
+  const installed = hasbin.sync('git-credential-netlify')
+  const helperPath = joinHelperPath()
+  if (installed && !fs.existsSync(path.join(helperPath, 'bin'))) {
+    return `Netlify's Git Credential Helper already installed with a package manager`
+  }
 }
 
-async function configureUnixInstall() : Promise<any> {
-  const helperPath = joinHelperPath()
-  const pathPromise = setupUnixPath(helperPath)
-  const configPromise = configureGitConfig(helperPath)
+function setupWindows() {
+  return {
+    title: `Installing Netlify's Git Credential Helper for Windows`,
+    skip: installedWithPackageManager,
+    task: installWithPowershell
+  }
+}
 
-  await pathPromise
-  await configPromise
+function setupUnix(platformKey: string, platformName: string) {
+  return {
+    title: `Installing Netlify's Git Credential Helper for ${platformName}`,
+    skip: installedWithPackageManager,
+    task: async function() : Promise<any> {
+      const release = await resolveRelease()
+      const file = await downloadFile(platformKey, release, 'tar.gz')
+      const helperPath = joinHelperPath()
+
+      await extractFile(file, helperPath)
+      await setupUnixPath(helperPath)
+    }
+  }
 }
 
 async function installWithPowershell() {
@@ -114,8 +111,7 @@ async function downloadFile(platform: string, release: string, format: string) :
   return filePath
 }
 
-async function extractFile(file: string) {
-  const helperPath = joinHelperPath()
+async function extractFile(file: string, helperPath: string) {
   const binPath = path.join(helperPath, "bin")
 
   if (!fs.existsSync(binPath)) {
