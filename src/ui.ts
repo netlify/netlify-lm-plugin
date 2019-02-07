@@ -1,12 +1,14 @@
+import os = require('os')
+import path = require('path')
 import {shellVariables, joinBinPath} from './install'
 
 const boxen = require('boxen')
-const path = require('path')
 
 export function printBanner(command: any, force: boolean) {
   const print = force || !binInPath()
+  const platform = os.platform()
 
-  if (print) {
+  if (print && platform !== 'win32') {
     const shellInfo = shellVariables()
     const banner = `Run this command to use Netlify Large Media in your current shell:\n\n source ${shellInfo.path}`
 
