@@ -8,6 +8,8 @@
     "@netlify/cli-utils": "^1.0.0",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
+    "boxen": "^2.1.0",
+    "hasbin": "^1.2.3",
     "listr": "^0.14.3",
     "netlify": "^2.2.4",
     "node-fetch": "^2.3.0",
