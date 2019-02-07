@@ -75,7 +75,7 @@ It runs the install command if you have not installed the dependencies yet.
         }
       }
     ])
-    tasks.run().catch((err: any) => this.log(err))
+    await tasks.run().catch((err: any) => this.log(err))
 
     if (helperInstalled) {
       printBanner(this, flags['force-install'])
