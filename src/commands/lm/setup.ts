@@ -38,6 +38,10 @@ It runs the install command if you have not installed the dependencies yet.
     'skip-install': flags.boolean({
       char: 's',
       description: 'Skip the credentials helper installation check'
+    }),
+    'force-install': flags.boolean({
+      char: 'f',
+      description: 'Force the credentials helper installation'
     })
   }
 
@@ -47,7 +51,7 @@ It runs the install command if you have not installed the dependencies yet.
     let helperInstalled = false
     if (!flags['skip-install']) {
       try {
-        helperInstalled = await installHelperIfMissing()
+        helperInstalled = await installHelperIfMissing(flags['force-install'])
       } catch (error) {
         this.log(error)
         return
@@ -74,12 +78,12 @@ It runs the install command if you have not installed the dependencies yet.
     tasks.run().catch((err: any) => this.log(err))
 
     if (helperInstalled) {
-      printBanner(this)
+      printBanner(this, flags['force-install'])
     }
   }
 }
 
-async function installHelperIfMissing() {
+async function installHelperIfMissing(force: boolean) {
   let installHelper = false
   try {
     const version = await checkHelperVersion()
@@ -91,8 +95,10 @@ async function installHelperIfMissing() {
   }
 
   if (installHelper) {
-    return installPlatform()
+    return installPlatform(force)
   }
+
+  return false
 }
 
 async function provisionService(accessToken: string, siteId: string) {

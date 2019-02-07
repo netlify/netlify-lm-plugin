@@ -17,7 +17,7 @@ and configures your Git environment with the right credentials.
   static flags = {
     force: flags.boolean({
       char: 'f',
-      description: 'Force helper installation'
+      description: 'Force the credentials helper installation'
     })
   }
 

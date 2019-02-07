@@ -10,10 +10,9 @@ export function printBanner(command: any, force: boolean) {
 
   if (print && platform !== 'win32') {
     const shellInfo = shellVariables()
-    const banner = `Run this command to use Netlify Large Media in your current shell:\n\n source ${shellInfo.path}`
+    const banner = `Run this command to use Netlify Large Media in your current shell:\n\nsource ${shellInfo.path}`
 
     command.log(boxen(banner, {padding: 1}))
-    command.log('(\\__/) ||\n(•ㅅ•) ||\n/ 　 づ')
   }
 }
 

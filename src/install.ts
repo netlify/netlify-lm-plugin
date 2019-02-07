@@ -177,7 +177,7 @@ fi`
       return writeConfig('.zshrc', initContent)
     default:
       const error = `Unable to set credential helper in PATH. We don't how to set the path for ${shellInfo.shell} shell.
-Set the helper path in your environment PATH: ${helperPath}/bin`
+Set the helper path in your environment PATH: ${joinBinPath()}`
       throw new Error(error)
   }
 }
