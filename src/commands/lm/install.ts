@@ -1,5 +1,6 @@
-import {Command} from '@oclif/command'
+import {Command, flags} from '@oclif/command'
 import {installPlatform} from '../../install'
+import {printBanner} from '../../ui'
 
 export default class LmInstall extends Command {
   static description = `Configures your computer to use Netlify Large Media.
@@ -13,9 +14,21 @@ and configures your Git environment with the right credentials.
   ]
   static aliases = ['lm:init']
 
+  static flags = {
+    force: flags.boolean({
+      char: 'f',
+      description: 'Force helper installation'
+    })
+  }
+
   async run() {
+    const {flags} = this.parse(LmInstall)
+
     try {
-      await installPlatform()
+      const installed = await installPlatform(flags.force)
+      if (installed) {
+        printBanner(this, flags.force)
+      }
     } catch (error) {
       this.log(error)
     }

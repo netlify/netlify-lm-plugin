@@ -1,6 +1,7 @@
 import {flags} from '@oclif/command'
 import {installPlatform} from '../../install'
 import {checkHelperVersion} from '../../requirements'
+import {printBanner} from '../../ui'
 
 const Command = require('@netlify/cli-utils')
 const { getAddons, createAddon } = require('netlify/src/addons')
@@ -43,11 +44,13 @@ It runs the install command if you have not installed the dependencies yet.
   async run() {
     const {flags} = this.parse(LmSetup)
 
+    let helperInstalled = false
     if (!flags['skip-install']) {
       try {
-        await installHelperIfMissing()
+        helperInstalled = await installHelperIfMissing()
       } catch (error) {
         this.log(error)
+        return
       }
     }
 
@@ -69,6 +72,10 @@ It runs the install command if you have not installed the dependencies yet.
       }
     ])
     tasks.run().catch((err: any) => this.log(err))
+
+    if (helperInstalled) {
+      printBanner(this)
+    }
   }
 }
 

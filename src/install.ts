@@ -9,23 +9,24 @@ const fetch = require('node-fetch')
 const hasbin = require('hasbin')
 const Listr = require('listr')
 
-export async function installPlatform() {
+export async function installPlatform(force: boolean) {
   const platform = os.platform()
   const steps = GitValidators
+  const skipInstall = !force && installedWithPackageManager()
 
   switch (platform) {
     case 'linux':
-      steps.push(setupUnix('linux', 'Linux'))
+      steps.push(setupUnix('linux', 'Linux', skipInstall))
       break
     case 'darwin':
-      steps.push(setupUnix('darwin', 'Mac OS X'))
+      steps.push(setupUnix('darwin', 'Mac OS X', skipInstall))
       break
     case 'win32':
-      steps.push(setupWindows())
+      steps.push(setupWindows(skipInstall))
       break
     default:
-      return Promise.reject(new Error(`Platform not supported: ${platform}.
-e manual setup instructions in https://github.com/netlify/netlify-credential-helper#install`))
+      throw new Error(`Platform not supported: ${platform}.
+e manual setup instructions in https://github.com/netlify/netlify-credential-helper#install`)
   }
 
   steps.push(
@@ -36,36 +37,41 @@ e manual setup instructions in https://github.com/netlify/netlify-credential-hel
   )
 
   const tasks = new Listr(steps)
-  return tasks.run()
+  await tasks.run()
+
+  return !skipInstall
 }
 
-function installedWithPackageManager() {
-  const installed = hasbin.sync('git-credential-netlify')
-  const helperPath = joinHelperPath()
-  if (installed && !fs.existsSync(path.join(helperPath, 'bin'))) {
+function skipHelperInstall(skip: boolean) {
+  if (skip) {
     return `Netlify's Git Credential Helper already installed with a package manager`
   }
 }
 
-function setupWindows() {
+function installedWithPackageManager() {
+  const installed = hasbin.sync('git-credential-netlify')
+  return installed && !fs.existsSync(joinBinPath())
+}
+
+function setupWindows(skipInstall: boolean) {
   return {
     title: `Installing Netlify's Git Credential Helper for Windows`,
-    skip: installedWithPackageManager,
+    skip: () => skipHelperInstall(skipInstall),
     task: installWithPowershell
   }
 }
 
-function setupUnix(platformKey: string, platformName: string) {
+function setupUnix(platformKey: string, platformName: string, skipInstall: boolean) {
   return {
     title: `Installing Netlify's Git Credential Helper for ${platformName}`,
-    skip: installedWithPackageManager,
+    skip: () => skipHelperInstall(skipInstall),
     task: async function() : Promise<any> {
       const release = await resolveRelease()
       const file = await downloadFile(platformKey, release, 'tar.gz')
       const helperPath = joinHelperPath()
 
       await extractFile(file, helperPath)
-      await setupUnixPath(helperPath)
+      await setupUnixPath()
     }
   }
 }
@@ -144,21 +150,15 @@ async function extractFile(file: string, helperPath: string) {
   await execa('tar', ['-C', binPath, '-xzf', file])
 }
 
-async function setupUnixPath(helperPath: string) {
-  let shell = process.env.SHELL
-  if (!shell) {
-    return Promise.reject(new Error('Unable to detect SHELL type, make sure the variable is defined in your environment'))
-  }
-
-  shell = shell.split(path.sep).pop()
-  const pathScript = `${helperPath}/path.${shell}.inc`
+async function setupUnixPath() {
+  const shellInfo = shellVariables()
 
   const initContent = `
 # The next line updates PATH for Netlify's Git Credential Helper.
-if [ -f '${pathScript}' ]; then source '${pathScript}'; fi
+if [ -f '${shellInfo.path}' ]; then source '${shellInfo.path}'; fi
 `
 
-  switch (shell) {
+  switch (shellInfo.shell) {
     case 'bash':
       const bashPath = `script_link="$( command readlink "$BASH_SOURCE" )" || script_link="$BASH_SOURCE"
 apparent_sdk_dir="\$\{script_link%/*}"
@@ -170,15 +170,15 @@ bin_path="$sdk_dir/bin"
 if [[ ":\$\{PATH}:" != *":\$\{bin_path}:"* ]]; then
 export PATH=$bin_path:$PATH
 fi`
-      fs.writeFileSync(pathScript, bashPath)
+      fs.writeFileSync(shellInfo.path, bashPath)
       return writeConfig('.bashrc', initContent)
     case 'zsh':
-      fs.writeFileSync(pathScript, 'export PATH=${0:A:h}/bin:$PATH')
+      fs.writeFileSync(shellInfo.path, 'export PATH=${0:A:h}/bin:$PATH')
       return writeConfig('.zshrc', initContent)
     default:
-      const error = `Unable to set credential helper in PATH. We don't how to set the path for ${shell} shell.
+      const error = `Unable to set credential helper in PATH. We don't how to set the path for ${shellInfo.shell} shell.
 Set the helper path in your environment PATH: ${helperPath}/bin`
-      return Promise.reject(new Error(error))
+      throw new Error(error)
   }
 }
 
@@ -250,4 +250,21 @@ async function configureGitConfig(helperPath: string) {
 
 function joinHelperPath() {
   return path.join(os.homedir(), ".netlify", "helper")
+}
+
+export function joinBinPath() {
+  return path.join(joinHelperPath(), 'bin')
+}
+
+export function shellVariables() {
+  let shell = process.env.SHELL
+  if (!shell) {
+    throw new Error('Unable to detect SHELL type, make sure the variable is defined in your environment')
+  }
+
+  shell = shell.split(path.sep).pop()
+  return {
+    shell: shell,
+    path: `${joinHelperPath()}/path.${shell}.inc`
+  }
 }
