@@ -12,7 +12,7 @@ export function printBanner(command: any, force: boolean) {
     const shellInfo = shellVariables()
     const banner = `Run this command to use Netlify Large Media in your current shell:\n\nsource ${shellInfo.path}`
 
-    command.log(boxen(banner, {padding: 1}))
+    command.log(boxen(banner, {padding: 1, margin: 1}))
   }
 }
 
