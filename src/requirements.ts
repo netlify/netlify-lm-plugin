@@ -1,14 +1,21 @@
+const chalk = require('chalk')
 const execa = require('execa')
 const semver = require('semver')
 
 export const GitValidators = [
   {
     title: 'Checking Git version',
-    task: checkGitVersion
+    task: async (ctx: any, task: any) => {
+      const version = await checkGitVersion()
+      task.title += chalk.dim(` [${version}]`)
+    }
   },
   {
     title: 'Checking Git LFS version',
-    task: checkLFSVersion
+    task: async (ctx: any, task: any) => {
+      const version = await checkLFSVersion()
+      task.title += chalk.dim(` [${version}]`)
+    }
   }
 ]
 
