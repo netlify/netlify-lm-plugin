@@ -2,8 +2,13 @@ import fs = require('fs')
 import os = require('os')
 import path = require('path')
 
-import {GitValidators} from './requirements'
+import {
+  checkGitVersion,
+  checkLFSVersion,
+  checkLFSFilters,
+} from './requirements'
 
+const chalk = require('chalk')
 const execa = require('execa')
 const fetch = require('node-fetch')
 const hasbin = require('hasbin')
@@ -11,8 +16,28 @@ const Listr = require('listr')
 
 export async function installPlatform(force: boolean) {
   const platform = os.platform()
-  const steps = GitValidators
   const skipInstall = !force && installedWithPackageManager()
+
+  const steps = [
+    {
+      title: 'Checking Git version',
+      task: checkGitVersion
+    },
+    {
+      title: 'Checking Git LFS version',
+      task: checkLFSVersion
+    },
+    {
+      title: 'Checking Git LFS filters',
+      task: async (ctx, task) : Promise<any> => {
+        const installed = await checkLFSFilters()
+        if (!installed) {
+          await execa('git', ['lfs', 'install'])
+          task.title += chalk.dim(' [installed]')
+        }
+      }
+    }
+  ]
 
   switch (platform) {
     case 'linux':
