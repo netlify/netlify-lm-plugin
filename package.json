@@ -1,8 +1,11 @@
 {
   "name": "netlify-lm-plugin",
   "description": "Netlify CLI plugin to work with Netlify Large Media",
-  "version": "0.1.0",
-  "author": "David Calavera @calavera",
+  "version": "1.0.0",
+  "author": "Netlify Inc.",
+  "contributors": [
+    "David Calavera <david@netlify.com> (https://twitter.com/calavera)"
+  ],
   "bugs": "https://github.com/netlify/netlify-lm-plugin/issues",
   "dependencies": {
     "@netlify/cli-utils": "^1.0.0",
