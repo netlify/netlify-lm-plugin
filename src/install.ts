@@ -167,6 +167,10 @@ async function extractFile(file: string, helperPath: string) {
 async function setupUnixPath() {
   const shellInfo = shellVariables()
 
+  if (process.env.PATH && process.env.PATH.includes(joinBinPath())) {
+    return true
+  }
+
   const initContent = `
 # The next line updates PATH for Netlify's Git Credential Helper.
 if [ -f '${shellInfo.path}' ]; then source '${shellInfo.path}'; fi
