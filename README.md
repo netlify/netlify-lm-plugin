@@ -1,3 +1,6 @@
+:warning: `netlify lm` command is now a part of core Netlify CLI (since 3.8.0) and not a plugin. This repository will no longer be maintained and installing the plugin in this way is not supported anymore.
+You can explictly uninstall this plugin from Netlify CLI with `netlify plugins:uninstall netlify-lm-plugin` if you wish.
+
 netlify-lm
 ==========
 
